@@ -1,0 +1,1892 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>T-Square | Deltas</title>
+    <link rel="shortcut icon" href="./assets/images/kyneaFavicon.png" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/7.0.1/css/all.min.css" />
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            min-height: 100vh;
+            position: relative;
+        }
+
+        .backGroundWrapper {
+            height: 100%;
+            width: 100%;
+            background: linear-gradient(to top, #2a444b, #b8d2d8);
+            position: absolute;
+        }
+
+        nav.navbar {
+            background: #ffffff;
+            color: #000;
+            padding: 0.5rem 1rem;
+            font-family: Arial, sans-serif;
+            position: sticky;
+            top: 0;
+            z-index: 1000;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 10%);
+        }
+
+        .navbar-container {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .navbar-left {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .navbar-brand {
+            display: flex;
+            align-items: center;
+            font-weight: bold;
+            font-size: 1.25rem;
+            gap: 0.5rem;
+        }
+
+        .navbar-brand img {
+            height: 35px;
+            width: 100%;
+            object-fit: contain;
+        }
+
+        .menu-btn {
+            background: none;
+            border: none;
+            font-size: 18px;
+            cursor: pointer;
+            color: #000;
+        }
+
+        .navbar-nav {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .avatar-container {
+            position: relative;
+            display: flex;
+            align-items: center;
+        }
+
+        .user-name {
+            font-size: 12px;
+            font-weight: 500;
+            letter-spacing: 0.2px;
+            font-weight: 500;
+            margin-right: 3px;
+        }
+
+        .avatar {
+            width: 24px;
+            height: 24px;
+            border-radius: 50%;
+            background-color: #3b5e67;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            cursor: pointer;
+            transition: background 0.2s;
+            font-size: 12px;
+            color: #ffffff;
+        }
+
+        .avatar:hover {
+            background: #4b5563;
+        }
+
+        .avatar-wrapper {
+            position: relative;
+            display: inline-block;
+        }
+
+        .dropdown {
+            position: absolute;
+            top: 110%;
+            right: 0;
+            background: #ffffff;
+            border-radius: 8px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.25);
+            min-width: 160px;
+            display: none;
+            flex-direction: column;
+            overflow: hidden;
+        }
+
+        .avatar-wrapper.active .dropdown {
+            display: flex;
+        }
+
+        .dropdown-item {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            padding: 10px 15px;
+            color: #3b5e67;
+            text-decoration: none;
+            transition: background 0.2s;
+            font-size: 14px;
+            white-space: nowrap;
+            font-weight: 500;
+        }
+
+        .dropdown-item:hover {
+            background: #3b5e67;
+            color: #ffffff;
+        }
+
+        .dropdown-icon {
+            font-size: 1.2rem;
+        }
+
+        .avatar-container.active .dropdown {
+            display: flex;
+        }
+
+        @media (max-width: 768px) {
+            .menu-btn {
+                display: block;
+            }
+
+            .navbar-nav {
+                display: none;
+                position: absolute;
+                top: 60px;
+                left: 0;
+                right: 0;
+                background: #1f2937;
+                flex-direction: column;
+                padding: 1rem;
+                gap: 0.75rem;
+            }
+
+            .navbar-nav.active {
+                display: flex;
+            }
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+
+        .upload-section {
+            background: rgba(255, 255, 255, 0.8);
+            backdrop-filter: blur(10px);
+            border-radius: 10px;
+            padding: 30px;
+            margin-bottom: 30px;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 10%);
+            margin-top: 15px;
+            position: relative;
+        }
+
+        .upload-header {
+            display: flex;
+            align-items: center;
+            position: relative;
+            margin-bottom: 25px;
+        }
+
+        .tabs {
+            display: flex;
+            border-top-left-radius: 5px;
+            border-top-right-radius: 10px;
+            overflow: hidden;
+            position: fixed;
+            left: 1px;
+            top: 3px;
+            background: #f1f3f4;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+            border: 1px solid #fff;
+            padding: 5px;
+        }
+
+        .tabs input[type="radio"] {
+            display: none;
+        }
+
+        .tabs label {
+            padding: 5px 35px;
+            font-weight: 500;
+            color: #3b5e67;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            background: transparent;
+            border-top-left-radius: 8px;
+            border-top-right-radius: 8px;
+        }
+
+        .tabs input[type="radio"]:checked+label {
+            background: #3b5e67;
+            color: #fff;
+        }
+
+        .upload-title {
+            margin: 0 auto;
+            color: #3b5e67;
+            font-size: 30px;
+            font-weight: 700;
+            text-align: center;
+            display: flex;
+            justify-content: center;
+        }
+
+        #delta-card {
+            display: none;
+        }
+
+        .upload-section:has(#tab2:checked) #delta-card {
+            display: block;
+        }
+
+        .upload-title span {
+            font-weight: 600;
+            font-size: 30px;
+        }
+
+        .upload-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 20px;
+            margin-bottom: 20px;
+        }
+
+        .upload-card {
+            background: rgba(255, 255, 255, 0.8);
+            border-radius: 15px;
+            padding: 20px;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 10%);
+            border: 2px dashed #3b5e67;
+            transition: all 0.3s ease;
+            text-align: center;
+        }
+
+        .upload-card:hover {
+            border-color: #4d7a85;
+            transform: translateY(-5px);
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
+        }
+
+        .upload-card.has-file {
+            border-color: #4d7a85;
+            background: #4d7a85;
+        }
+
+        .upload-card.has-file .upload-label {
+            color: #ffffff;
+        }
+
+        .upload-label {
+            color: #3b5e67;
+            font-size: 16px;
+            font-weight: 500;
+            margin-bottom: 10px;
+        }
+
+        .file-input {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #3b5e67;
+            border-radius: 8px;
+            background: #ffffff;
+            color: #4d7a85;
+            cursor: pointer;
+        }
+
+        .file-input::file-selector-button {
+            background: #4d7a85;
+            color: #ffffff;
+            border: none;
+            padding: 8px 16px;
+            border-radius: 5px;
+            margin-right: 10px;
+            cursor: pointer;
+        }
+
+        .action-btns {
+            display: flex;
+            justify-content: flex-end;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .process-btn {
+            display: block;
+            padding: 8px 30px;
+            background: #3b5e67;
+            color: #ffffff;
+            border: none;
+            border-radius: 25px;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 10%);
+        }
+
+        .process-btn:hover:not(:disabled) {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 10%);
+        }
+
+        .process-btn:disabled {
+            background: #3b5e67;
+            cursor: not-allowed;
+            box-shadow: none;
+            opacity: 0.6;
+        }
+
+        .reset-btn {
+            display: block;
+            padding: 7px 25px;
+            background: linear-gradient(45deg, #d85c53, #da5e5e);
+            color: white;
+            border: none;
+            border-radius: 25px;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 2px 5px rgba(244, 67, 54, 0.2);
+        }
+
+        .compare-section {
+            display: none;
+            background: rgba(255, 255, 255, 0.8);
+            backdrop-filter: blur(10px);
+            border-radius: 20px;
+            padding: 30px;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            box-shadow: 0 8px 32px rgba(31, 38, 135, 0.37);
+        }
+
+        .compare-section.active {
+            display: block;
+        }
+
+        .row {
+            display: flex;
+            gap: 20px;
+            margin-bottom: 20px;
+        }
+
+        .col-6 {
+            flex: 1;
+        }
+
+        .card {
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 15px;
+            overflow: hidden;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+
+        .canvas-header {
+            background: rgba(255, 255, 255, 0.1);
+            padding: 15px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            color: #3b5e67;
+            font-weight: 600;
+            position: relative;
+        }
+
+        .zoom-header {
+            background: rgba(255, 255, 255, 0.1);
+            padding: 15px;
+            color: #3b5e67;
+            font-weight: 600;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            position: relative;
+        }
+
+        .zoom-controls {
+            position: absolute;
+            right: 15px;
+            display: flex;
+            align-items: center;
+        }
+
+        .zoom-btn {
+            background: #3b5e67;
+            color: #ffffff;
+            border: none;
+            width: 28px;
+            height: 28px;
+            border-radius: 4px;
+            font-size: 16px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.2s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            line-height: 1;
+        }
+
+        .zoom-btn:hover {
+            background: #4b5563;
+        }
+
+        .zoom-btn:disabled {
+            background: #6c757d;
+            cursor: not-allowed;
+        }
+
+        .zoom-level {
+            font-size: 12px;
+            color: #666;
+            min-width: 40px;
+            text-align: center;
+        }
+
+
+        .toggle-container {
+            display: flex;
+            border-radius: 25px;
+            overflow: hidden;
+            width: fit-content;
+            background: #e5e7eb;
+            border: 2px solid #3b5e67;
+            position: absolute;
+            right: 10px;
+        }
+
+        .toggle-container input[type="radio"] {
+            display: none;
+        }
+
+        .toggle-container label {
+            flex: 1;
+            text-align: center;
+            padding: 3px 15px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-size: 14px;
+            color: #3b5e67;
+            margin-right: -1px;
+        }
+
+        .toggle-container input[type="radio"]:checked+label {
+            background: #3b5e67;
+            color: #ffffff;
+            transform: scale(1.05);
+        }
+
+        canvas {
+            width: 100%;
+            height: 300px;
+            display: block;
+            background: #6f888e;
+        }
+
+        .zoom-canvas {
+            height: 300px;
+        }
+
+        .spinner-overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.5);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 15px;
+        }
+
+        .spinner {
+            width: 40px;
+            height: 40px;
+            border: 4px solid rgba(255, 255, 255, 0.3);
+            border-top: 4px solid #4CAF50;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            0% {
+                transform: rotate(0deg);
+            }
+
+            100% {
+                transform: rotate(360deg);
+            }
+        }
+
+        .no-data-overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: #3b5e67;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 16px;
+            border-radius: 15px;
+        }
+
+        .canvas-container {
+            position: relative;
+            overflow: hidden;
+            border-radius: 0 0 15px 15px;
+        }
+
+        .keyboard-hint {
+            text-align: center;
+            color: #3b5e67;
+            margin-top: 20px;
+            font-size: 12px;
+            font-weight: 700;
+        }
+
+        .status-indicator {
+            display: inline-block;
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            margin-left: 8px;
+        }
+
+        .status-loading {
+            background: #ff9800;
+        }
+
+        .status-loaded {
+            background: #4CAF50;
+        }
+
+        .status-error {
+            background: #f44336;
+        }
+
+        @media (max-width: 768px) {
+            .row {
+                flex-direction: column;
+            }
+
+            .upload-grid {
+                grid-template-columns: 1fr;
+            }
+
+            canvas {
+                height: 300px;
+            }
+
+            .zoom-canvas {
+                height: 200px;
+            }
+        }
+
+        /* add to your existing <style> block */
+        .switch {
+            position: absolute;
+            left: 8px;
+            top: 50%;
+            transform: translateY(-50%);
+            width: 36px;
+            height: 20px;
+            z-index: 220;
+            display: inline-block;
+        }
+
+        .switch input {
+            display: none;
+        }
+
+        .switch .slider {
+            position: absolute;
+            inset: 0;
+            background: #e5e7eb;
+            border-radius: 999px;
+            transition: background .18s;
+            border: 2px solid #3b5e67;
+        }
+
+        .switch .slider::before {
+            content: "";
+            position: absolute;
+            left: 3px;
+            top: 2px;
+            width: 14px;
+            height: 14px;
+            background: #3b5e67;
+            border-radius: 50%;
+            transition: transform .18s;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.25);
+        }
+
+        .switch input:checked+.slider {
+            background: #3b5e67;
+        }
+
+        .switch input:checked+.slider::before {
+            transform: translateX(16px);
+            background: #e5e7eb;
+        }
+
+        .zoom-pointer-dot {
+            position: absolute;
+            width: 14px;
+            height: 14px;
+            border-radius: 50%;
+            background: #ff3b30;
+            box-shadow: 0 0 8px rgba(255, 59, 48, 0.85);
+            pointer-events: none;
+            transform: translate(-50%, -50%);
+            display: none;
+            z-index: 360;
+        }
+
+        .canvas-cursor-hidden {
+            cursor: none !important;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="backGroundWrapper"><span class="dot"></span></div>
+    <!-- Navbar -->
+    <nav class="navbar">
+        <div class="navbar-container">
+            <div class="navbar-left">
+                <div class="nav-item">
+                    <button class="menu-btn" title="Menu">
+                        <i class="fa-solid fa-bars"></i>
+                    </button>
+                </div>
+
+                <div class="navbar-brand">
+                    <img src="./assets/images/tsquareAutoLogo.png" alt="">
+                </div>
+            </div>
+
+            <div class="navbar-nav">
+                <div class="nav-item avatar-container">
+                    <span class="user-name">prasad.dasika@kynea.io</span>
+                    <div class="avatar-wrapper">
+                        <div class="avatar" id="avatar-btn" title="User Menu">
+                            <span>P</span>
+                        </div>
+                        <div class="dropdown" id="dropdown-menu">
+                            <a href="#" class="dropdown-item">
+                                <div class="dropdown-icon"><i class="fa-solid fa-circle-user"></i></div>
+                                <span>Profile</span>
+                            </a>
+                            <a href="#" class="dropdown-item">
+                                <div class="dropdown-icon"><i class="fa-solid fa-key"></i></div>
+                                <span>Change Password</span>
+                            </a>
+                            <a href="#" class="dropdown-item">
+                                <div class="dropdown-icon"><i class="fa-solid fa-right-from-bracket"></i></div>
+                                <span>Logout</span>
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <div class="container">
+        <div class="upload-section">
+            <div class="upload-header">
+                <div class="tabs">
+                    <input type="radio" id="tab1" name="tab" checked>
+                    <label for="tab1">Δ - Process</label>
+
+                    <input type="radio" id="tab2" name="tab">
+                    <label for="tab2">Inspect</label>
+                </div>
+                <h1 class="upload-title">Δ<span>s</span></h1>
+            </div>
+            <div class="upload-grid">
+                <div class="upload-card" id="rev1-card">
+                    <div class="upload-label">Revision 1</div>
+                    <input type="file" class="file-input" id="rev1-input" accept="image/*">
+                </div>
+                <div class="upload-card" id="rev2-card">
+                    <div class="upload-label">Revision 2</div>
+                    <input type="file" class="file-input" id="rev2-input" accept="image/*">
+                </div>
+                <div class="upload-card" id="delta-card">
+                    <div class="upload-label">Delta Image</div>
+                    <input type="file" class="file-input" id="delta-input" accept="image/*">
+                </div>
+            </div>
+            <div class="action-btns">
+                <button class="process-btn" id="process-btn" disabled>Process Images</button>
+                <button class="reset-btn" id="reset-btn"><i class="fa-solid fa-arrows-rotate"></i> Reset</button>
+            </div>
+        </div>
+
+        <div class="compare-section" id="compare-section">
+            <div class="row">
+                <div class="col-6">
+                    <div class="card">
+                        <div class="canvas-header">
+                            <span>Revision - <span id="selected-value-1">R1</span></span>
+                            <div class="toggle-container">
+                                <input type="radio" id="r1-1" name="r-toggle-1" value="R1" checked>
+                                <label for="r1-1">R1</label>
+                                <input type="radio" id="r2-1" name="r-toggle-1" value="R2">
+                                <label for="r2-1">R2</label>
+                            </div>
+                        </div>
+                        <div class="canvas-container">
+                            <canvas id="canvas1"></canvas>
+                            <div class="spinner-overlay" id="spinner-a" style="display: none;">
+                                <div class="spinner"></div>
+                            </div>
+                            <div class="no-data-overlay" id="no-data-a" style="display: none;">
+                                No data available
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-6">
+                    <div class="card">
+                        <div class="canvas-header">
+                            <span>
+                                <span id="canvas-b-type">Revision</span>
+                                <span id="dash-span"> - </span>
+                                <span id="selected-value-2">R2</span>
+                            </span>
+                            <div class="toggle-container">
+                                <input type="radio" id="r1-2" name="r-toggle-2" value="R2" checked>
+                                <label for="r1-2">R2</label>
+                                <input type="radio" id="r2-2" name="r-toggle-2" value="Δ">
+                                <label for="r2-2">Δs</label>
+                            </div>
+                        </div>
+                        <div class="canvas-container">
+                            <canvas id="canvas2"></canvas>
+                            <div class="spinner-overlay" id="spinner-b" style="display: none;">
+                                <div class="spinner"></div>
+                            </div>
+                            <div class="no-data-overlay" id="no-data-b" style="display: none;">
+                                No data available
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="row">
+                <div class="col-6">
+                    <div class="card">
+                        <div class="zoom-header">
+                            <label class="switch" title="Toggle zoom pointer 1">
+                                <input type="checkbox" id="zoom1-mini-toggle" />
+                                <span class="slider"></span>
+                            </label>
+                            <span>View - 1</span>
+                            <div class="zoom-controls">
+                                <button class="zoom-btn" id="zoom-out-1" title="Zoom Out">-</button>
+                                <span class="zoom-level" id="zoom-level-1">2.0x</span>
+                                <button class="zoom-btn" id="zoom-in-1" title="Zoom In">+</button>
+                            </div>
+                        </div>
+                        <div class="canvas-container">
+                            <canvas id="zoom1" class="zoom-canvas"></canvas>
+                            <div class="no-data-overlay" id="no-zoom-a" style="display: none;">
+                                No data available
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-6">
+                    <div class="card">
+                        <div class="zoom-header">
+                            <label class="switch" title="Toggle zoom pointer 2">
+                                <input type="checkbox" id="zoom2-mini-toggle" />
+                                <span class="slider"></span>
+                            </label>
+
+                            <span>View - 2</span>
+                            <div class="zoom-controls">
+                                <button class="zoom-btn" id="zoom-out-2" title="Zoom Out">-</button>
+                                <span class="zoom-level" id="zoom-level-2">2.0x</span>
+                                <button class="zoom-btn" id="zoom-in-2" title="Zoom In">+</button>
+                            </div>
+                        </div>
+                        <div class="canvas-container">
+                            <canvas id="zoom2" class="zoom-canvas"></canvas>
+                            <div class="no-data-overlay" id="no-zoom-b" style="display: none;">
+                                No data available
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="keyboard-hint">
+                Use A/D keys to toggle Revision 1 | Use ← → arrow keys to toggle Revision 2 Use ↑ key to toggle View-1
+                bullet | Use ↓ key to toggle View-2 bullet | Press Enter to toggle both
+            </div>
+        </div>
+    </div>
+
+    <script>
+        class ImageCompareApp {
+            constructor() {
+                this.uploadedFiles = {
+                    rev1: null,
+                    rev2: null,
+                    delta: 'static'
+                };
+
+                this.imageURLs = {
+                    rev1: null,
+                    rev2: null,
+                    delta: './assets/images/Rev2_page1_with_deltas.png'
+                };
+
+                this.canvasState = {
+                    A: 'loading',
+                    B: 'loading'
+                };
+
+                this.selectedValues = {
+                    canvas1: 'R1',
+                    canvas2: 'R2'
+                };
+
+                // Zoom factors for each zoom view
+                this.zoomFactors = {
+                    zoom1: 2.0,
+                    zoom2: 2.0
+                };
+
+                this.minZoom = 1.0;
+                this.maxZoom = 8.0;
+                this.zoomStep = 0.5;
+
+                this.threeJSObjects = {
+                    sceneA: null,
+                    sceneB: null,
+                    cameraA: null,
+                    cameraB: null,
+                    rendererA: null,
+                    rendererB: null,
+                    meshA: null,
+                    meshB: null,
+                    rectA: null,
+                    rectB: null,
+                    zoomSceneA: null,
+                    zoomSceneB: null,
+                    zoomCameraA: null,
+                    zoomCameraB: null,
+                    zoomRendererA: null,
+                    zoomRendererB: null,
+                    zoomMeshA: null,
+                    zoomMeshB: null
+                };
+
+                this.raycaster = new THREE.Raycaster();
+                this.mouse = new THREE.Vector2();
+                this.zoomCenter = new THREE.Vector2(0.5, 0.5);
+                this.animationId = null;
+                this.resizeCache = new Map();
+                this.isProcessed = false;
+
+                // zoom pointer state + DOM refs
+                this.showZoomPointer = { zoom1: false, zoom2: false };
+                this.zoomPointerElements = { zoom1: null, zoom2: null };
+
+                this.initEventListeners();
+            }
+
+            initEventListeners() {
+                // Tab change listeners
+                document.getElementById('tab1').addEventListener('change', () => this.handleTabChange());
+                document.getElementById('tab2').addEventListener('change', () => this.handleTabChange());
+
+                // File upload listeners
+                document.getElementById('rev1-input').addEventListener('change', (e) => this.handleFileUpload(e, 'rev1'));
+                document.getElementById('rev2-input').addEventListener('change', (e) => this.handleFileUpload(e, 'rev2'));
+                document.getElementById('delta-input').addEventListener('change', (e) => this.handleFileUpload(e, 'delta'));
+
+                // Process button
+                document.getElementById('process-btn').addEventListener('click', () => this.processImages());
+
+                // Reset button
+                document.getElementById('reset-btn').addEventListener('click', () => this.resetAll());
+
+                // Toggle listeners
+                document.querySelectorAll('input[name="r-toggle-1"]').forEach(input => {
+                    input.addEventListener('change', (e) => this.handleToggleChange(e, 'canvas1'));
+                });
+                document.querySelectorAll('input[name="r-toggle-2"]').forEach(input => {
+                    input.addEventListener('change', (e) => this.handleToggleChange(e, 'canvas2'));
+                });
+
+                // Zoom control listeners
+                document.getElementById('zoom-in-1').addEventListener('click', () => this.handleZoom('zoom1', 'in'));
+                document.getElementById('zoom-out-1').addEventListener('click', () => this.handleZoom('zoom1', 'out'));
+                document.getElementById('zoom-in-2').addEventListener('click', () => this.handleZoom('zoom2', 'in'));
+                document.getElementById('zoom-out-2').addEventListener('click', () => this.handleZoom('zoom2', 'out'));
+
+                // Keyboard listener
+                document.addEventListener('keydown', (e) => this.handleKeyboard(e));
+                this.initBulletPointers();
+                this.initBulletKeyboardControl();
+            }
+
+            handleZoom(zoomCanvas, direction) {
+                const currentZoom = this.zoomFactors[zoomCanvas];
+                let newZoom;
+
+                if (direction === 'in') {
+                    newZoom = Math.min(currentZoom + this.zoomStep, this.maxZoom);
+                } else {
+                    newZoom = Math.max(currentZoom - this.zoomStep, this.minZoom);
+                }
+
+                if (newZoom !== currentZoom) {
+                    this.zoomFactors[zoomCanvas] = newZoom;
+                    this.updateZoomLevel(zoomCanvas, newZoom);
+                    this.updateZoomButtons(zoomCanvas, newZoom);
+                }
+            }
+
+            updateZoomLevel(zoomCanvas, zoomLevel) {
+                const levelId = zoomCanvas === 'zoom1' ? 'zoom-level-1' : 'zoom-level-2';
+                document.getElementById(levelId).textContent = `${zoomLevel.toFixed(1)}x`;
+            }
+
+            updateZoomButtons(zoomCanvas, zoomLevel) {
+                const inId = zoomCanvas === 'zoom1' ? 'zoom-in-1' : 'zoom-in-2';
+                const outId = zoomCanvas === 'zoom1' ? 'zoom-out-1' : 'zoom-out-2';
+
+                document.getElementById(inId).disabled = zoomLevel >= this.maxZoom;
+                document.getElementById(outId).disabled = zoomLevel <= this.minZoom;
+            }
+
+            handleTabChange() {
+                const tab2Active = document.getElementById('tab2').checked;
+
+                // Reset all file inputs first
+                ['rev1', 'rev2', 'delta'].forEach(type => {
+                    const input = document.getElementById(`${type}-input`);
+                    const card = document.getElementById(`${type}-card`);
+                    input.value = '';
+                    card.classList.remove('has-file');
+
+                    if (this.imageURLs[type] && type !== 'delta') {
+                        URL.revokeObjectURL(this.imageURLs[type]);
+                    }
+                    this.uploadedFiles[type] = null;
+                    if (type !== 'delta' || !tab2Active) {
+                        this.imageURLs[type] = null;
+                    }
+                });
+
+                if (!tab2Active) {
+                    this.uploadedFiles.delta = 'static';
+                    this.imageURLs.delta = './assets/images/Rev2_page1_with_deltas.png';
+                }
+
+                // Reset canvas selection to default
+                this.selectedValues = { canvas1: 'R1', canvas2: 'R2' };
+                document.querySelector('input[name="r-toggle-1"][value="R1"]').checked = true;
+                document.querySelector('input[name="r-toggle-2"][value="R2"]').checked = true;
+                document.getElementById('selected-value-1').textContent = 'R1';
+                document.getElementById('selected-value-2').textContent = 'R2';
+                document.getElementById('canvas-b-type').textContent = 'Revision';
+
+                this.checkAllFilesUploaded();
+                document.getElementById('compare-section').classList.remove('active');
+
+                this.setCanvasState('A', 'loading');
+                this.setCanvasState('B', 'loading');
+
+                if (this.isProcessed && this.selectedValues.canvas2 === 'Δ' && this.imageURLs.delta) {
+                    this.updateProcessedImages('delta');
+                }
+            }
+
+            handleFileUpload(event, type) {
+                const file = event.target.files[0];
+                if (!file) return;
+
+                const oldUrl = this.imageURLs[type];
+                if (oldUrl && oldUrl !== './assets/images/Rev2_page1_with_deltas.png') {
+                    URL.revokeObjectURL(oldUrl);
+                }
+
+                this.uploadedFiles[type] = file;
+                this.imageURLs[type] = URL.createObjectURL(file);
+
+                const card = document.getElementById(`${type}-card`);
+                if (card) card.classList.add('has-file');
+
+                this.checkAllFilesUploaded();
+
+                if (this.isProcessed) {
+                    this.updateProcessedImages(type);
+                }
+            }
+
+            async updateProcessedImages(updatedType) {
+                const updates = [];
+
+                if ((updatedType === 'rev1' && this.selectedValues.canvas1 === 'R1') ||
+                    (updatedType === 'rev2' && this.selectedValues.canvas1 === 'R2')) {
+                    updates.push({ canvasType: 'canvas1', canvasId: 'A' });
+                }
+
+                if ((updatedType === 'rev2' && this.selectedValues.canvas2 === 'R2') ||
+                    (updatedType === 'delta' && this.selectedValues.canvas2 === 'Δ')) {
+                    updates.push({ canvasType: 'canvas2', canvasId: 'B' });
+                }
+
+                for (const update of updates) {
+                    const currentValue = this.selectedValues[update.canvasType];
+
+                    let imageUrl;
+                    switch (currentValue) {
+                        case 'R1':
+                            imageUrl = this.imageURLs.rev1;
+                            break;
+                        case 'R2':
+                            imageUrl = this.imageURLs.rev2;
+                            break;
+                        case 'Δ':
+                            imageUrl = this.imageURLs.delta;
+                            break;
+                    }
+
+                    if (!imageUrl) {
+                        this.setCanvasState(update.canvasId, 'no-data');
+                        continue;
+                    }
+
+                    this.setCanvasState(update.canvasId, 'loading');
+
+                    try {
+                        const cacheKeys = Array.from(this.resizeCache.keys());
+                        const oldCacheKey = cacheKeys.find(key => key.includes(updatedType));
+                        if (oldCacheKey) {
+                            this.resizeCache.delete(oldCacheKey);
+                        }
+
+                        await this.updateCanvasImage(update.canvasType, imageUrl);
+                        this.setCanvasState(update.canvasId, 'loaded');
+                    } catch (error) {
+                        console.error('Error updating processed image:', error);
+                        this.setCanvasState(update.canvasId, 'no-data');
+                    }
+                }
+            }
+
+            checkAllFilesUploaded() {
+                const tab2Active = document.getElementById('tab2').checked;
+
+                let allUploaded;
+                if (tab2Active) {
+                    allUploaded = this.uploadedFiles.rev1 && this.uploadedFiles.rev2 && this.uploadedFiles.delta;
+                } else {
+                    allUploaded = this.uploadedFiles.rev1 && this.uploadedFiles.rev2;
+                }
+
+                document.getElementById('process-btn').disabled = !allUploaded;
+            }
+
+            async processImages() {
+                const tab2Active = document.getElementById('tab2').checked;
+
+                if (!this.uploadedFiles.rev1 || !this.uploadedFiles.rev2 || (tab2Active && !this.uploadedFiles.delta)) {
+                    alert('Please upload all required images before processing.');
+                    return;
+                }
+
+                document.getElementById('compare-section').classList.add('active');
+
+                this.setCanvasState('A', 'loading');
+                this.setCanvasState('B', 'loading');
+
+                await new Promise(resolve => setTimeout(resolve, 2000));
+
+                try {
+                    await this.initializeThreeJS();
+                    await new Promise(resolve => setTimeout(resolve, 8000));
+                    this.isProcessed = true;
+                } catch (error) {
+                    console.error('Error processing images:', error);
+                    alert('Error processing images. Please try again.');
+                }
+            }
+
+            resetAll() {
+                if (this.animationId) {
+                    cancelAnimationFrame(this.animationId);
+                    this.animationId = null;
+                }
+
+                this.cleanup();
+
+                ['rev1', 'rev2', 'delta'].forEach(type => {
+                    const input = document.getElementById(`${type}-input`);
+                    if (input) input.value = '';
+                });
+
+                ['rev1', 'rev2', 'delta'].forEach(type => {
+                    const card = document.getElementById(`${type}-card`);
+                    if (card) card.classList.remove('has-file');
+                });
+
+                ['rev1', 'rev2'].forEach(type => {
+                    if (this.imageURLs[type]) URL.revokeObjectURL(this.imageURLs[type]);
+                });
+                if (this.imageURLs.delta && this.imageURLs.delta !== './assets/images/Rev2_page1_with_deltas.png') {
+                    URL.revokeObjectURL(this.imageURLs.delta);
+                }
+
+                const tab2Active = document.getElementById('tab2').checked;
+                if (tab2Active) {
+                    this.uploadedFiles = { rev1: null, rev2: null, delta: null };
+                    this.imageURLs = { rev1: null, rev2: null, delta: null };
+                } else {
+                    this.uploadedFiles = { rev1: null, rev2: null, delta: 'static' };
+                    this.imageURLs = {
+                        rev1: null,
+                        rev2: null,
+                        delta: './assets/images/Rev2_page1_with_deltas.png'
+                    };
+                }
+
+                this.selectedValues = { canvas1: 'R1', canvas2: 'R2' };
+                document.querySelector('input[name="r-toggle-1"][value="R1"]').checked = true;
+                document.querySelector('input[name="r-toggle-2"][value="R2"]').checked = true;
+                document.getElementById('selected-value-1').textContent = 'R1';
+                document.getElementById('selected-value-2').textContent = 'R2';
+                document.getElementById('canvas-b-type').textContent = 'Revision';
+                const dashSpan = document.getElementById('dash-span');
+                if (dashSpan) dashSpan.style.display = 'inline';
+
+                document.getElementById('compare-section').classList.remove('active');
+                document.getElementById('process-btn').disabled = true;
+
+                this.resizeCache.clear();
+
+                // Reset zoom factors and UI
+                this.zoomFactors = { zoom1: 2.0, zoom2: 2.0 };
+                this.updateZoomLevel('zoom1', 2.0);
+                this.updateZoomLevel('zoom2', 2.0);
+                this.updateZoomButtons('zoom1', 2.0);
+                this.updateZoomButtons('zoom2', 2.0);
+
+                this.threeJSObjects = {
+                    sceneA: null, sceneB: null, cameraA: null, cameraB: null,
+                    rendererA: null, rendererB: null, meshA: null, meshB: null,
+                    rectA: null, rectB: null, zoomSceneA: null, zoomSceneB: null,
+                    zoomCameraA: null, zoomCameraB: null, zoomRendererA: null,
+                    zoomRendererB: null, zoomMeshA: null, zoomMeshB: null
+                };
+
+                this.isProcessed = false;
+                this.canvasState = { A: 'loading', B: 'loading' };
+            }
+
+            setCanvasState(canvas, state) {
+                this.canvasState[canvas] = state;
+
+                const spinnerId = canvas === 'A' ? 'spinner-a' : 'spinner-b';
+                const noDataId = canvas === 'A' ? 'no-data-a' : 'no-data-b';
+                const zoomNoDataId = canvas === 'A' ? 'no-zoom-a' : 'no-zoom-b';
+
+                document.getElementById(spinnerId).style.display = state === 'loading' ? 'flex' : 'none';
+                document.getElementById(noDataId).style.display = state === 'no-data' ? 'flex' : 'none';
+                document.getElementById(zoomNoDataId).style.display = state !== 'loaded' ? 'flex' : 'none';
+            }
+
+            async initializeThreeJS() {
+                await this.initCanvas('canvas1', 'A', this.imageURLs.rev1);
+                await this.initCanvas('canvas2', 'B', this.imageURLs.rev2);
+                this.initZoomCanvases();
+                this.animate();
+            }
+
+            async initCanvas(canvasId, id, imageUrl) {
+                const canvas = document.getElementById(canvasId);
+                const width = canvas.clientWidth || 800;
+                const height = canvas.clientHeight || 400;
+
+                try {
+                    const scene = new THREE.Scene();
+                    scene.background = new THREE.Color(0x3b5e67);
+
+                    const camera = new THREE.PerspectiveCamera(45, width / height, 1, 10000);
+                    const renderer = new THREE.WebGLRenderer({
+                        canvas,
+                        antialias: true,
+                        alpha: false,
+                        powerPreference: "high-performance"
+                    });
+                    renderer.setSize(width, height);
+                    renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+
+                    const texture = await this.loadTexture(imageUrl);
+                    const resizedCanvas = await this.resizeImage(texture.image);
+
+                    texture.image = resizedCanvas;
+                    texture.needsUpdate = true;
+                    texture.colorSpace = THREE.SRGBColorSpace;
+                    texture.magFilter = THREE.LinearFilter;
+                    texture.minFilter = THREE.LinearFilter;
+                    texture.generateMipmaps = false;
+
+                    const geometry = new THREE.PlaneGeometry(resizedCanvas.width, resizedCanvas.height);
+                    const material = new THREE.MeshBasicMaterial({ map: texture });
+                    const mesh = new THREE.Mesh(geometry, material);
+                    scene.add(mesh);
+
+                    const rectGeometry = new THREE.BufferGeometry();
+                    rectGeometry.setAttribute('position', new THREE.BufferAttribute(new Float32Array(24), 3));
+                    const rectMaterial = new THREE.LineBasicMaterial({ color: 0xff0000 });
+                    const rect = new THREE.LineSegments(rectGeometry, rectMaterial);
+                    scene.add(rect);
+
+                    const aspect = width / height;
+                    const imgAspect = resizedCanvas.width / resizedCanvas.height;
+                    const camZ = aspect >= imgAspect
+                        ? resizedCanvas.height / (2 * Math.tan(THREE.MathUtils.degToRad(camera.fov) / 2))
+                        : resizedCanvas.width / (2 * aspect * Math.tan(THREE.MathUtils.degToRad(camera.fov) / 2));
+                    camera.position.set(0, 0, Math.max(camZ, 100));
+
+                    // Save references
+                    if (id === 'A') {
+                        this.threeJSObjects.sceneA = scene;
+                        this.threeJSObjects.cameraA = camera;
+                        this.threeJSObjects.rendererA = renderer;
+                        this.threeJSObjects.meshA = mesh;
+                        this.threeJSObjects.rectA = rect;
+                    } else {
+                        this.threeJSObjects.sceneB = scene;
+                        this.threeJSObjects.cameraB = camera;
+                        this.threeJSObjects.rendererB = renderer;
+                        this.threeJSObjects.meshB = mesh;
+                        this.threeJSObjects.rectB = rect;
+                    }
+
+                    // Ensure correct binding of 'this'
+                    canvas.addEventListener('mousedown', () => { this.isMouseDown = true; });
+                    canvas.addEventListener('mouseup', () => { this.isMouseDown = false; });
+                    canvas.addEventListener('mouseleave', () => { this.isMouseDown = false; });
+                    canvas.addEventListener('mousemove', (e) => this.onMouseMove(e, id));
+
+                    this.setCanvasState(id, 'loaded');
+                } catch (error) {
+                    console.error(`Error initializing canvas ${id}:`, error);
+                    this.setCanvasState(id, 'no-data');
+                    throw error;
+                }
+            }
+
+            initZoomCanvases() {
+                const setupZoom = (canvasId, mesh) => {
+                    const canvas = document.getElementById(canvasId);
+                    const width = canvas.clientWidth || 400;
+                    const height = canvas.clientHeight || 300;
+
+                    const camera = new THREE.OrthographicCamera(
+                        -width / 2, width / 2, height / 2, -height / 2, 1, 10000
+                    );
+                    camera.position.z = 1000;
+
+                    const renderer = new THREE.WebGLRenderer({
+                        canvas,
+                        antialias: true,
+                        alpha: false,
+                        powerPreference: "high-performance"
+                    });
+                    renderer.setSize(width, height);
+                    renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+
+                    const scene = new THREE.Scene();
+                    scene.background = new THREE.Color(0x6f888e);
+
+                    const zoomMesh = mesh.clone();
+                    scene.add(zoomMesh);
+
+                    return { camera, renderer, scene, zoomMesh };
+                };
+
+                if (this.threeJSObjects.meshA) {
+                    const zoomA = setupZoom('zoom1', this.threeJSObjects.meshA);
+                    this.threeJSObjects.zoomCameraA = zoomA.camera;
+                    this.threeJSObjects.zoomRendererA = zoomA.renderer;
+                    this.threeJSObjects.zoomSceneA = zoomA.scene;
+                    this.threeJSObjects.zoomMeshA = zoomA.zoomMesh;
+                }
+
+                if (this.threeJSObjects.meshB) {
+                    const zoomB = setupZoom('zoom2', this.threeJSObjects.meshB);
+                    this.threeJSObjects.zoomCameraB = zoomB.camera;
+                    this.threeJSObjects.zoomRendererB = zoomB.renderer;
+                    this.threeJSObjects.zoomSceneB = zoomB.scene;
+                    this.threeJSObjects.zoomMeshB = zoomB.zoomMesh;
+                }
+            }
+
+            loadTexture(url) {
+                return new Promise((resolve, reject) => {
+                    const loader = new THREE.TextureLoader();
+                    const timeout = setTimeout(() => reject(new Error('Texture load timeout')), 15000);
+
+                    loader.load(
+                        url,
+                        (texture) => {
+                            clearTimeout(timeout);
+                            resolve(texture);
+                        },
+                        undefined,
+                        (error) => {
+                            clearTimeout(timeout);
+                            reject(error);
+                        }
+                    );
+                });
+            }
+
+            async resizeImage(image, maxSize = 8192) {
+                try {
+                    const scale = Math.min(maxSize / image.width, maxSize / image.height, 1);
+                    const canvas = document.createElement('canvas');
+                    canvas.width = Math.floor(image.width * scale);
+                    canvas.height = Math.floor(image.height * scale);
+
+                    const ctx = canvas.getContext('2d');
+                    const bitmap = await createImageBitmap(image);
+                    ctx.drawImage(bitmap, 0, 0, canvas.width, canvas.height);
+                    bitmap.close();
+
+                    return canvas;
+                } catch (error) {
+                    console.error('Error resizing image:', error);
+                    throw error;
+                }
+            }
+
+            onMouseMove(event, source) {
+                if (!this.isMouseDown) return;
+
+                const renderer = source === 'A' ? this.threeJSObjects.rendererA : this.threeJSObjects.rendererB;
+                const camera = source === 'A' ? this.threeJSObjects.cameraA : this.threeJSObjects.cameraB;
+                const mesh = source === 'A' ? this.threeJSObjects.meshA : this.threeJSObjects.meshB;
+
+                if (!mesh || !renderer || !camera) return;
+
+                const rect = renderer.domElement.getBoundingClientRect();
+                this.mouse.x = ((event.clientX - rect.left) / rect.width) * 2 - 1;
+                this.mouse.y = -((event.clientY - rect.top) / rect.height) * 2 + 1;
+
+                this.raycaster.setFromCamera(this.mouse, camera);
+                const intersects = this.raycaster.intersectObject(mesh);
+
+                if (intersects.length > 0 && intersects[0].uv) {
+                    this.zoomCenter.copy(intersects[0].uv);
+                }
+            }
+            /* --- Zoom bullet setup --- */
+            createZoomPointerElements() {
+                const makeDot = (id) => {
+                    const canvas = document.getElementById(id);
+                    if (!canvas) return;
+                    const container = canvas.closest('.canvas-container');
+                    if (!container) return;
+                    if (window.getComputedStyle(container).position === 'static') {
+                        container.style.position = 'relative';
+                    }
+                    let dot = container.querySelector('.zoom-pointer-dot');
+                    if (!dot) {
+                        dot = document.createElement('div');
+                        dot.className = 'zoom-pointer-dot';
+                        container.appendChild(dot);
+                    }
+                    return dot;
+                };
+                this.zoomPointerElements = {
+                    zoom1: makeDot('zoom1'),
+                    zoom2: makeDot('zoom2'),
+                };
+            }
+
+            toggleZoomPointer(id, enabled) {
+                this.showZoomPointer[id] = enabled;
+                const dot = this.zoomPointerElements[id];
+                const canvas = document.getElementById(id);
+
+                if (dot) dot.style.display = enabled ? 'block' : 'none';
+
+                if (canvas) {
+                    if (enabled) {
+                        canvas.classList.add('canvas-cursor-hidden');
+                    } else {
+                        canvas.classList.remove('canvas-cursor-hidden');
+                    }
+                }
+            }
+
+
+            handleZoomCanvasPointer(e, id) {
+                if (!this.showZoomPointer[id]) return;
+                const canvas = e.currentTarget;
+                const dot = this.zoomPointerElements[id];
+                if (!canvas || !dot) return;
+
+                const rect = canvas.getBoundingClientRect();
+                const x = e.clientX - rect.left;
+                const y = e.clientY - rect.top;
+
+                dot.style.left = `${x}px`;
+                dot.style.top = `${y}px`;
+                dot.style.display = 'block';
+            }
+
+            hideZoomPointer(id) {
+                const dot = this.zoomPointerElements[id];
+                if (dot) dot.style.display = 'none';
+            }
+
+            /* --- Call once in initEventListeners() --- */
+            initBulletPointers() {
+                this.showZoomPointer = { zoom1: false, zoom2: false };
+                this.createZoomPointerElements();
+
+                const zoom1 = document.getElementById('zoom1');
+                const zoom2 = document.getElementById('zoom2');
+                if (zoom1) {
+                    zoom1.addEventListener('mousemove', (e) => this.handleZoomCanvasPointer(e, 'zoom1'));
+                    zoom1.addEventListener('mouseleave', () => this.hideZoomPointer('zoom1'));
+                }
+                if (zoom2) {
+                    zoom2.addEventListener('mousemove', (e) => this.handleZoomCanvasPointer(e, 'zoom2'));
+                    zoom2.addEventListener('mouseleave', () => this.hideZoomPointer('zoom2'));
+                }
+
+                const t1 = document.getElementById('zoom1-mini-toggle');
+                const t2 = document.getElementById('zoom2-mini-toggle');
+                if (t1) t1.addEventListener('change', (e) => this.toggleZoomPointer('zoom1', e.target.checked));
+                if (t2) t2.addEventListener('change', (e) => this.toggleZoomPointer('zoom2', e.target.checked));
+            }
+
+            initBulletKeyboardControl() {
+                document.addEventListener('keydown', (e) => {
+                    const t1 = document.getElementById('zoom1-mini-toggle');
+                    const t2 = document.getElementById('zoom2-mini-toggle');
+
+                    if (!t1 || !t2) return;
+
+                    // 🔼 Toggle View-1 ON/OFF
+                    if (e.key === 'ArrowUp') {
+                        t1.checked = !t1.checked;
+                        this.toggleZoomPointer('zoom1', t1.checked);
+                    }
+
+                    // 🔽 Toggle View-2 ON/OFF
+                    else if (e.key === 'ArrowDown') {
+                        t2.checked = !t2.checked;
+                        this.toggleZoomPointer('zoom2', t2.checked);
+                    }
+
+                    // ⏎ Toggle BOTH ON/OFF
+                    else if (e.key === 'Enter') {
+                        const newState = !(t1.checked && t2.checked);
+                        t1.checked = newState;
+                        t2.checked = newState;
+                        this.toggleZoomPointer('zoom1', newState);
+                        this.toggleZoomPointer('zoom2', newState);
+                    }
+                });
+            }
+
+
+
+            updateZoom() {
+                const updateZoomView = (rect, mesh, zoomCamera, zoomRenderer, zoomScene, canvasId, zoomFactor) => {
+                    if (!mesh || !mesh.material || !rect || !rect.geometry) return;
+
+                    const material = mesh.material;
+                    if (!material.map) return;
+
+                    const texture = material.map;
+                    const imgW = texture.image.width;
+                    const imgH = texture.image.height;
+
+                    const canvas = document.getElementById(canvasId);
+                    const px = (this.zoomCenter.x - 0.5) * imgW;
+                    const py = (this.zoomCenter.y - 0.5) * imgH;
+
+                    const halfW = (canvas.clientWidth || 400) / zoomFactor;
+                    const halfH = (canvas.clientHeight || 300) / zoomFactor;
+
+                    const vertices = new Float32Array([
+                        px - halfW, py + halfH, 0, px + halfW, py + halfH, 0,
+                        px + halfW, py + halfH, 0, px + halfW, py - halfH, 0,
+                        px + halfW, py - halfH, 0, px - halfW, py - halfH, 0,
+                        px - halfW, py - halfH, 0, px - halfW, py + halfH, 0,
+                    ]);
+                    rect.geometry.setAttribute('position', new THREE.BufferAttribute(vertices, 3));
+                    rect.geometry.attributes.position.needsUpdate = true;
+
+                    zoomCamera.left = px - halfW;
+                    zoomCamera.right = px + halfW;
+                    zoomCamera.top = py + halfH;
+                    zoomCamera.bottom = py - halfH;
+                    zoomCamera.updateProjectionMatrix();
+
+                    zoomRenderer.render(zoomScene, zoomCamera);
+                };
+
+                if (this.threeJSObjects.rectA && this.threeJSObjects.meshA) {
+                    updateZoomView(
+                        this.threeJSObjects.rectA,
+                        this.threeJSObjects.meshA,
+                        this.threeJSObjects.zoomCameraA,
+                        this.threeJSObjects.zoomRendererA,
+                        this.threeJSObjects.zoomSceneA,
+                        'zoom1',
+                        this.zoomFactors.zoom1
+                    );
+                }
+
+                if (this.threeJSObjects.rectB && this.threeJSObjects.meshB) {
+                    updateZoomView(
+                        this.threeJSObjects.rectB,
+                        this.threeJSObjects.meshB,
+                        this.threeJSObjects.zoomCameraB,
+                        this.threeJSObjects.zoomRendererB,
+                        this.threeJSObjects.zoomSceneB,
+                        'zoom2',
+                        this.zoomFactors.zoom2
+                    );
+                }
+            }
+
+            animate() {
+                this.animationId = requestAnimationFrame(() => this.animate());
+
+                if (this.threeJSObjects.rendererA && this.threeJSObjects.sceneA && this.threeJSObjects.cameraA) {
+                    this.threeJSObjects.rendererA.render(this.threeJSObjects.sceneA, this.threeJSObjects.cameraA);
+                }
+                if (this.threeJSObjects.rendererB && this.threeJSObjects.sceneB && this.threeJSObjects.cameraB) {
+                    this.threeJSObjects.rendererB.render(this.threeJSObjects.sceneB, this.threeJSObjects.cameraB);
+                }
+
+                this.updateZoom();
+            }
+
+            async handleToggleChange(event, canvasType) {
+                if (!event.target.checked) return;
+
+                const value = event.target.value;
+                this.selectedValues[canvasType] = value;
+
+                const canvasId = canvasType === 'canvas1' ? 'A' : 'B';
+                this.setCanvasState(canvasId, 'loading');
+
+                if (canvasType === 'canvas1') {
+                    document.getElementById('selected-value-1').textContent = value;
+                } else {
+                    const typeSpan = document.getElementById('canvas-b-type');
+                    const valueSpan = document.getElementById('selected-value-2');
+                    const dashSpan = document.getElementById('dash-span');
+
+                    if (value === 'Δ') {
+                        typeSpan.textContent = 'Δs';
+                        valueSpan.textContent = '';
+                        dashSpan.style.display = 'none';
+                    } else {
+                        typeSpan.textContent = 'Revision';
+                        valueSpan.textContent = value;
+                        dashSpan.style.display = 'inline';
+                    }
+                }
+
+                let imageUrl;
+                switch (value) {
+                    case 'R1':
+                        imageUrl = this.imageURLs.rev1;
+                        break;
+                    case 'R2':
+                        imageUrl = this.imageURLs.rev2;
+                        break;
+                    case 'Δ':
+                        imageUrl = this.imageURLs.delta;
+                        break;
+                    default:
+                        this.setCanvasState(canvasId, 'no-data');
+                        return;
+                }
+
+                if (!imageUrl) {
+                    this.setCanvasState(canvasId, 'no-data');
+                    return;
+                }
+
+                try {
+                    await this.updateCanvasImage(canvasType, imageUrl);
+                    this.setCanvasState(canvasId, 'loaded');
+                } catch (error) {
+                    console.error('Error switching image:', error);
+                    this.setCanvasState(canvasId, 'no-data');
+                }
+            }
+
+            async updateCanvasImage(canvasType, imageUrl) {
+                const isCanvasA = canvasType === 'canvas1';
+                const mesh = isCanvasA ? this.threeJSObjects.meshA : this.threeJSObjects.meshB;
+                const renderer = isCanvasA ? this.threeJSObjects.rendererA : this.threeJSObjects.rendererB;
+                const scene = isCanvasA ? this.threeJSObjects.sceneA : this.threeJSObjects.sceneB;
+                const camera = isCanvasA ? this.threeJSObjects.cameraA : this.threeJSObjects.cameraB;
+
+                if (!mesh || !renderer || !scene || !camera) {
+                    throw new Error('Canvas not properly initialized');
+                }
+
+                try {
+                    const texture = await this.loadTexture(imageUrl);
+
+                    let resizedCanvas;
+                    const cacheKey = imageUrl;
+                    if (this.resizeCache.has(cacheKey)) {
+                        resizedCanvas = this.resizeCache.get(cacheKey);
+                    } else {
+                        resizedCanvas = await this.resizeImage(texture.image);
+                        this.resizeCache.set(cacheKey, resizedCanvas);
+                    }
+
+                    texture.image = resizedCanvas;
+                    texture.needsUpdate = true;
+                    texture.colorSpace = THREE.SRGBColorSpace;
+                    texture.magFilter = THREE.LinearFilter;
+                    texture.minFilter = THREE.LinearFilter;
+                    texture.anisotropy = Math.min(renderer.capabilities.getMaxAnisotropy(), 4);
+                    texture.generateMipmaps = false;
+
+                    const material = mesh.material;
+                    if (material.map) {
+                        material.map.dispose();
+                    }
+                    material.map = texture;
+                    material.needsUpdate = true;
+
+                    mesh.geometry.dispose();
+                    mesh.geometry = new THREE.PlaneGeometry(resizedCanvas.width, resizedCanvas.height);
+
+                    const canvasElement = isCanvasA ? document.getElementById('canvas1') : document.getElementById('canvas2');
+                    const width = canvasElement.clientWidth || 800;
+                    const height = canvasElement.clientHeight || 400;
+                    const aspect = width / height;
+                    const imgAspect = resizedCanvas.width / resizedCanvas.height;
+
+                    const camZ = aspect >= imgAspect
+                        ? resizedCanvas.height / (2 * Math.tan(THREE.MathUtils.degToRad(camera.fov) / 2))
+                        : resizedCanvas.width / (2 * aspect * Math.tan(THREE.MathUtils.degToRad(camera.fov) / 2));
+                    camera.position.set(0, 0, Math.max(camZ, 100));
+
+                    const zoomMesh = isCanvasA ? this.threeJSObjects.zoomMeshA : this.threeJSObjects.zoomMeshB;
+                    if (zoomMesh) {
+                        const zoomTexture = texture.clone();
+                        zoomTexture.needsUpdate = true;
+
+                        const zoomMaterial = zoomMesh.material;
+                        if (zoomMaterial.map) {
+                            zoomMaterial.map.dispose();
+                        }
+                        zoomMaterial.map = zoomTexture;
+                        zoomMaterial.needsUpdate = true;
+
+                        zoomMesh.geometry.dispose();
+                        zoomMesh.geometry = new THREE.PlaneGeometry(resizedCanvas.width, resizedCanvas.height);
+                    }
+
+                    renderer.render(scene, camera);
+
+                } catch (error) {
+                    console.error('Error updating canvas image:', error);
+                    throw error;
+                }
+            }
+
+            handleKeyboard(event) {
+                const { meshA, meshB, rendererA, rendererB, cameraA, cameraB } = this.threeJSObjects;
+                if (!meshA || !meshB || !rendererA || !rendererB || !cameraA || !cameraB) return;
+
+                if (event.key === 'a' || event.key === 'A' || event.key === 'd' || event.key === 'D') {
+                    const newValue1 = this.selectedValues.canvas1 === 'R1' ? 'R2' : 'R1';
+                    this.selectedValues.canvas1 = newValue1;
+                    document.querySelector(`input[name="r-toggle-1"][value="${newValue1}"]`).checked = true;
+                    document.getElementById('selected-value-1').textContent = newValue1;
+
+                    this.setCanvasState('A', 'loading');
+                    const imageUrl1 = newValue1 === 'R1' ? this.imageURLs.rev1 : this.imageURLs.rev2;
+                    if (imageUrl1) {
+                        this.updateCanvasImage('canvas1', imageUrl1).then(() => {
+                            this.setCanvasState('A', 'loaded');
+                        }).catch(() => {
+                            this.setCanvasState('A', 'no-data');
+                        });
+                    }
+                }
+
+                if (event.key === 'ArrowLeft' || event.key === 'ArrowRight') {
+                    const newValue2 = this.selectedValues.canvas2 === 'R2' ? 'Δ' : 'R2';
+                    this.selectedValues.canvas2 = newValue2;
+                    document.querySelector(`input[name="r-toggle-2"][value="${newValue2}"]`).checked = true;
+                    const typeSpan = document.getElementById('canvas-b-type');
+                    const valueSpan = document.getElementById('selected-value-2');
+                    const dashSpan = document.getElementById('dash-span');
+
+                    if (newValue2 === 'Δ') {
+                        typeSpan.textContent = 'Δs';
+                        valueSpan.textContent = '';
+                        dashSpan.style.display = 'none';
+                    } else {
+                        typeSpan.textContent = 'Revision';
+                        valueSpan.textContent = newValue2;
+                        dashSpan.style.display = 'inline';
+                    }
+
+                    this.setCanvasState('B', 'loading');
+                    const imageUrl2 = newValue2 === 'R2' ? this.imageURLs.rev2 : this.imageURLs.delta;
+                    if (imageUrl2) {
+                        this.updateCanvasImage('canvas2', imageUrl2).then(() => {
+                            this.setCanvasState('B', 'loaded');
+                        }).catch(() => {
+                            this.setCanvasState('B', 'no-data');
+                        });
+                    }
+                }
+            }
+
+            cleanup() {
+                if (this.animationId) {
+                    cancelAnimationFrame(this.animationId);
+                    this.animationId = null;
+                }
+
+                const disposeRenderer = (renderer) => {
+                    if (renderer) {
+                        renderer.dispose();
+                        renderer.forceContextLoss();
+                    }
+                };
+
+                const disposeMaterial = (material) => {
+                    if (material) {
+                        if (material.map) material.map.dispose();
+                        material.dispose();
+                    }
+                };
+
+                const disposeMesh = (mesh) => {
+                    if (mesh) {
+                        disposeMaterial(mesh.material);
+                        if (mesh.geometry) mesh.geometry.dispose();
+                    }
+                };
+
+                [
+                    this.threeJSObjects.rendererA,
+                    this.threeJSObjects.rendererB,
+                    this.threeJSObjects.zoomRendererA,
+                    this.threeJSObjects.zoomRendererB
+                ].forEach(disposeRenderer);
+
+                [
+                    this.threeJSObjects.meshA,
+                    this.threeJSObjects.meshB,
+                    this.threeJSObjects.zoomMeshA,
+                    this.threeJSObjects.zoomMeshB
+                ].forEach(disposeMesh);
+
+                if (this.threeJSObjects.rectA) {
+                    if (this.threeJSObjects.rectA.geometry) this.threeJSObjects.rectA.geometry.dispose();
+                    if (this.threeJSObjects.rectA.material) this.threeJSObjects.rectA.material.dispose();
+                }
+                if (this.threeJSObjects.rectB) {
+                    if (this.threeJSObjects.rectB.geometry) this.threeJSObjects.rectB.geometry.dispose();
+                    if (this.threeJSObjects.rectB.material) this.threeJSObjects.rectB.material.dispose();
+                }
+            }
+        }
+
+        let app;
+        document.addEventListener('DOMContentLoaded', () => {
+            app = new ImageCompareApp();
+        });
+
+        window.addEventListener('beforeunload', () => {
+            if (app) {
+                app.cleanup();
+            }
+        });
+
+        let resizeTimeout;
+        window.addEventListener('resize', () => {
+            clearTimeout(resizeTimeout);
+            resizeTimeout = setTimeout(() => {
+                if (app && app.threeJSObjects.rendererA) {
+                    const canvas1 = document.getElementById('canvas1');
+                    const canvas2 = document.getElementById('canvas2');
+
+                    if (app.threeJSObjects.rendererA) {
+                        app.threeJSObjects.rendererA.setSize(canvas1.clientWidth, canvas1.clientHeight);
+                        app.threeJSObjects.cameraA.aspect = canvas1.clientWidth / canvas1.clientHeight;
+                        app.threeJSObjects.cameraA.updateProjectionMatrix();
+                    }
+
+                    if (app.threeJSObjects.rendererB) {
+                        app.threeJSObjects.rendererB.setSize(canvas2.clientWidth, canvas2.clientHeight);
+                        app.threeJSObjects.cameraB.aspect = canvas2.clientWidth / canvas2.clientHeight;
+                        app.threeJSObjects.cameraB.updateProjectionMatrix();
+                    }
+
+                    const zoom1 = document.getElementById('zoom1');
+                    const zoom2 = document.getElementById('zoom2');
+
+                    if (app.threeJSObjects.zoomRendererA) {
+                        app.threeJSObjects.zoomRendererA.setSize(zoom1.clientWidth, zoom1.clientHeight);
+                    }
+
+                    if (app.threeJSObjects.zoomRendererB) {
+                        app.threeJSObjects.zoomRendererB.setSize(zoom2.clientWidth, zoom2.clientHeight);
+                    }
+                }
+            }, 250);
+        });
+    </script>
+</body>
+
+</html>
