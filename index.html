@@ -606,53 +606,6 @@
             }
         }
 
-        /* add to your existing <style> block */
-        .switch {
-            position: absolute;
-            left: 8px;
-            top: 50%;
-            transform: translateY(-50%);
-            width: 36px;
-            height: 20px;
-            z-index: 220;
-            display: inline-block;
-        }
-
-        .switch input {
-            display: none;
-        }
-
-        .switch .slider {
-            position: absolute;
-            inset: 0;
-            background: #e5e7eb;
-            border-radius: 999px;
-            transition: background .18s;
-            border: 2px solid #3b5e67;
-        }
-
-        .switch .slider::before {
-            content: "";
-            position: absolute;
-            left: 3px;
-            top: 2px;
-            width: 14px;
-            height: 14px;
-            background: #3b5e67;
-            border-radius: 50%;
-            transition: transform .18s;
-            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.25);
-        }
-
-        .switch input:checked+.slider {
-            background: #3b5e67;
-        }
-
-        .switch input:checked+.slider::before {
-            transform: translateX(16px);
-            background: #e5e7eb;
-        }
-
         .zoom-pointer-dot {
             position: absolute;
             width: 14px;
@@ -664,7 +617,9 @@
             transform: translate(-50%, -50%);
             display: none;
             z-index: 360;
+            transition: top 0.06s linear, left 0.06s linear;
         }
+
 
         .canvas-cursor-hidden {
             cursor: none !important;
@@ -804,10 +759,6 @@
                 <div class="col-6">
                     <div class="card">
                         <div class="zoom-header">
-                            <label class="switch" title="Toggle zoom pointer 1">
-                                <input type="checkbox" id="zoom1-mini-toggle" />
-                                <span class="slider"></span>
-                            </label>
                             <span>View - 1</span>
                             <div class="zoom-controls">
                                 <button class="zoom-btn" id="zoom-out-1" title="Zoom Out">-</button>
@@ -826,11 +777,6 @@
                 <div class="col-6">
                     <div class="card">
                         <div class="zoom-header">
-                            <label class="switch" title="Toggle zoom pointer 2">
-                                <input type="checkbox" id="zoom2-mini-toggle" />
-                                <span class="slider"></span>
-                            </label>
-
                             <span>View - 2</span>
                             <div class="zoom-controls">
                                 <button class="zoom-btn" id="zoom-out-2" title="Zoom Out">-</button>
@@ -849,8 +795,7 @@
             </div>
 
             <div class="keyboard-hint">
-                Use A/D keys to toggle Revision 1 | Use ← → arrow keys to toggle Revision 2 Use ↑ key to toggle View-1
-                bullet | Use ↓ key to toggle View-2 bullet | Press Enter to toggle both
+                Use A/D keys to toggle Revision 1 | Use ← → arrow keys to toggle Revision 2
             </div>
         </div>
     </div>
@@ -1417,24 +1362,29 @@
                     this.zoomCenter.copy(intersects[0].uv);
                 }
             }
-            /* --- Zoom bullet setup --- */
+
+            // bulletpoint start
             createZoomPointerElements() {
                 const makeDot = (id) => {
                     const canvas = document.getElementById(id);
                     if (!canvas) return;
                     const container = canvas.closest('.canvas-container');
                     if (!container) return;
+
                     if (window.getComputedStyle(container).position === 'static') {
                         container.style.position = 'relative';
                     }
+
                     let dot = container.querySelector('.zoom-pointer-dot');
                     if (!dot) {
                         dot = document.createElement('div');
                         dot.className = 'zoom-pointer-dot';
                         container.appendChild(dot);
                     }
+
                     return dot;
                 };
+
                 this.zoomPointerElements = {
                     zoom1: makeDot('zoom1'),
                     zoom2: makeDot('zoom2'),
@@ -1442,35 +1392,26 @@
             }
 
             toggleZoomPointer(id, enabled) {
-                this.showZoomPointer[id] = enabled;
                 const dot = this.zoomPointerElements[id];
                 const canvas = document.getElementById(id);
 
                 if (dot) dot.style.display = enabled ? 'block' : 'none';
-
                 if (canvas) {
-                    if (enabled) {
-                        canvas.classList.add('canvas-cursor-hidden');
-                    } else {
-                        canvas.classList.remove('canvas-cursor-hidden');
-                    }
+                    if (enabled) canvas.classList.add('canvas-cursor-hidden');
+                    else canvas.classList.remove('canvas-cursor-hidden');
                 }
             }
 
-
             handleZoomCanvasPointer(e, id) {
-                if (!this.showZoomPointer[id]) return;
-                const canvas = e.currentTarget;
                 const dot = this.zoomPointerElements[id];
-                if (!canvas || !dot) return;
+                if (!dot) return;
 
-                const rect = canvas.getBoundingClientRect();
+                const rect = e.target.getBoundingClientRect();
                 const x = e.clientX - rect.left;
                 const y = e.clientY - rect.top;
 
                 dot.style.left = `${x}px`;
                 dot.style.top = `${y}px`;
-                dot.style.display = 'block';
             }
 
             hideZoomPointer(id) {
@@ -1478,59 +1419,45 @@
                 if (dot) dot.style.display = 'none';
             }
 
-            /* --- Call once in initEventListeners() --- */
             initBulletPointers() {
                 this.showZoomPointer = { zoom1: false, zoom2: false };
                 this.createZoomPointerElements();
 
                 const zoom1 = document.getElementById('zoom1');
                 const zoom2 = document.getElementById('zoom2');
+
                 if (zoom1) {
-                    zoom1.addEventListener('mousemove', (e) => this.handleZoomCanvasPointer(e, 'zoom1'));
-                    zoom1.addEventListener('mouseleave', () => this.hideZoomPointer('zoom1'));
+                    zoom1.addEventListener('mouseenter', () => {
+                        this.showZoomPointer.zoom1 = true;
+                        this.toggleZoomPointer('zoom1', true);
+                    });
+
+                    zoom1.addEventListener('mousemove', (e) => {
+                        if (this.showZoomPointer.zoom1) this.handleZoomCanvasPointer(e, 'zoom1');
+                    });
+
+                    zoom1.addEventListener('mouseleave', () => {
+                        this.showZoomPointer.zoom1 = false;
+                        this.toggleZoomPointer('zoom1', false);
+                    });
                 }
+
                 if (zoom2) {
-                    zoom2.addEventListener('mousemove', (e) => this.handleZoomCanvasPointer(e, 'zoom2'));
-                    zoom2.addEventListener('mouseleave', () => this.hideZoomPointer('zoom2'));
+                    zoom2.addEventListener('mouseenter', () => {
+                        this.showZoomPointer.zoom2 = true;
+                        this.toggleZoomPointer('zoom2', true);
+                    });
+
+                    zoom2.addEventListener('mousemove', (e) => {
+                        if (this.showZoomPointer.zoom2) this.handleZoomCanvasPointer(e, 'zoom2');
+                    });
+
+                    zoom2.addEventListener('mouseleave', () => {
+                        this.showZoomPointer.zoom2 = false;
+                        this.toggleZoomPointer('zoom2', false);
+                    });
                 }
-
-                const t1 = document.getElementById('zoom1-mini-toggle');
-                const t2 = document.getElementById('zoom2-mini-toggle');
-                if (t1) t1.addEventListener('change', (e) => this.toggleZoomPointer('zoom1', e.target.checked));
-                if (t2) t2.addEventListener('change', (e) => this.toggleZoomPointer('zoom2', e.target.checked));
             }
-
-            initBulletKeyboardControl() {
-                document.addEventListener('keydown', (e) => {
-                    const t1 = document.getElementById('zoom1-mini-toggle');
-                    const t2 = document.getElementById('zoom2-mini-toggle');
-
-                    if (!t1 || !t2) return;
-
-                    // 🔼 Toggle View-1 ON/OFF
-                    if (e.key === 'ArrowUp') {
-                        t1.checked = !t1.checked;
-                        this.toggleZoomPointer('zoom1', t1.checked);
-                    }
-
-                    // 🔽 Toggle View-2 ON/OFF
-                    else if (e.key === 'ArrowDown') {
-                        t2.checked = !t2.checked;
-                        this.toggleZoomPointer('zoom2', t2.checked);
-                    }
-
-                    // ⏎ Toggle BOTH ON/OFF
-                    else if (e.key === 'Enter') {
-                        const newState = !(t1.checked && t2.checked);
-                        t1.checked = newState;
-                        t2.checked = newState;
-                        this.toggleZoomPointer('zoom1', newState);
-                        this.toggleZoomPointer('zoom2', newState);
-                    }
-                });
-            }
-
-
 
             updateZoom() {
                 const updateZoomView = (rect, mesh, zoomCamera, zoomRenderer, zoomScene, canvasId, zoomFactor) => {
