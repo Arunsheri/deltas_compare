@@ -202,8 +202,9 @@
         .upload-header {
             display: flex;
             align-items: center;
+            justify-content: center;
             position: relative;
-            margin-bottom: 25px;
+            margin-bottom: 30px;
         }
 
         .tabs {
@@ -248,6 +249,8 @@
             text-align: center;
             display: flex;
             justify-content: center;
+            position: fixed;
+            top: 3px;
         }
 
         #delta-card {
@@ -903,7 +906,6 @@
                 // Keyboard listener
                 document.addEventListener('keydown', (e) => this.handleKeyboard(e));
                 this.initBulletPointers();
-                this.initBulletKeyboardControl();
             }
 
             handleZoom(zoomCanvas, direction) {
@@ -993,6 +995,46 @@
 
                 const card = document.getElementById(`${type}-card`);
                 if (card) card.classList.add('has-file');
+
+                const tab2Active = document.getElementById('tab2').checked;
+                if (type === 'rev2' && !tab2Active) {
+
+                    const fileName = file.name;
+
+                    // Extract prefix before underscore
+                    const prefix = fileName.includes('_')
+                        ? fileName.substring(0, fileName.indexOf('_'))
+                        : fileName.split('.')[0];
+
+                    console.log("Extracted prefix:", prefix);
+
+                    const basePath = `./${prefix}/delta`;
+                    const extensions = ['png', 'jpg', 'jpeg', 'webp'];
+
+                    const tryLoad = (index = 0) => {
+                        if (index >= extensions.length) {
+                            console.warn('No delta image found');
+                            return;
+                        }
+
+                        const testPath = `${basePath}.${extensions[index]}`;
+                        const img = new Image();
+
+                        img.onload = () => {
+                            this.imageURLs.delta = testPath;
+                            this.uploadedFiles.delta = 'auto-from-prefix';
+                            console.log('Delta loaded:', testPath);
+                        };
+
+                        img.onerror = () => {
+                            tryLoad(index + 1);
+                        };
+
+                        img.src = testPath;
+                    };
+
+                    tryLoad();
+                }
 
                 this.checkAllFilesUploaded();
 
